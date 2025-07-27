@@ -1,7 +1,13 @@
+// src/App.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import {AppBar, Toolbar, Typography, Container, Box, Grid, Paper, FormControl,
-  InputLabel, Select, MenuItem, TextField,createTheme, ThemeProvider, CssBaseline, IconButton, Button,
-  Snackbar, Alert, Skeleton} from '@mui/material';
+import {
+  AppBar, Toolbar, Typography, Container, Box, Grid, Paper, FormControl,
+  InputLabel, Select, MenuItem, TextField,
+  // Material-UI Theming imports
+  createTheme, ThemeProvider, CssBaseline, IconButton, Button,
+  // New imports for UI improvements
+  Snackbar, Alert, Skeleton // Added for enhanced feedback and loading states
+} from '@mui/material';
 
 // Material-UI Icon imports for theme toggle
 import Brightness4Icon from '@mui/icons-material/Brightness4'; // Moon icon for Dark Mode
@@ -13,21 +19,23 @@ import {
   BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
 
-
+// Import your custom components and local mock data
 import RuleEditor from './components/RuleEditor';
-import { mockUserProfiles } from './data/mockUsers'; 
-import { mockContentVariants } from './data/mockContentVariants';
+import { mockUserProfiles } from './data/mockUsers'; // Still using local user profiles
+import { mockContentVariants } from './data/mockContentVariants'; // Still using local content variants
 import { evaluateRules } from './utils/personalizationEngine';
 
 
 function App() {
-  // Theme mode state
+  // --- State Declarations ---
+
+  // Theme mode state, initialized from Local Storage
   const [mode, setMode] = useState(() => {
     if (typeof window !== 'undefined') {
       const storedMode = localStorage.getItem('themeMode');
-      return storedMode || 'light'; // Default "light"
+      return storedMode || 'light'; // Default to 'light' if not found
     }
-    return 'light';
+    return 'light'; // Default for SSR or initial render without window
   });
 
   // Personalization Rules state, initialized from Local Storage
@@ -41,13 +49,13 @@ function App() {
     }
   });
 
-  // State for current simulated user
+  // State for current simulated user (selected from mockUserProfiles)
   const [selectedUser, setSelectedUser] = useState(mockUserProfiles[0]);
 
   // State for the key of the content variant determined by personalization engine
   const [personalizedContentKey, setPersonalizedContentKey] = useState('default');
 
-  // State for A/B Test Configuration
+  // State for A/B Test Configuration (Simulated)
   const [abTestConfig, setAbTestConfig] = useState({
     testName: 'Homepage Personalization Test',
     controlVariant: '', // Default to empty for validation
@@ -74,7 +82,11 @@ function App() {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // 'success' | 'error' | 'info' | 'warning'
 
-  
+  // --- End State Declarations ---
+
+
+  // --- Helper Functions ---
+
   // Function to show Snackbar messages
   const showSnackbar = (message, severity) => {
     setSnackbarMessage(message);
@@ -108,7 +120,7 @@ function App() {
     return errors;
   };
 
-    // Effect to save theme mode to Local Storage
+    // Effect to save theme mode to Local Storage whenever 'mode' state changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('themeMode', mode);
@@ -136,6 +148,7 @@ function App() {
     setChartsLoading(true); // Set loading to true when starting data generation
     // Simulate a network delay for data loading
     const timer = setTimeout(() => {
+      // --- Helper Functions to Generate Mock Data ---
       const generateEngagementData = () => {
         const data = [];
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -201,11 +214,12 @@ function App() {
       setDynamicConversionRateData(generateConversionRateComparison());
 
       setChartsLoading(false); // Set loading to false after data is generated
-    }, 1500);
+    }, 1500); // Simulate 1.5 seconds loading time
 
     return () => clearTimeout(timer); // Cleanup timer on unmount
 
   }, []); // Empty dependency array: this effect runs only once on mount
+  // --- End useEffects ---
 
 
   // Callback function for RuleEditor to update rules state
@@ -262,20 +276,23 @@ function App() {
         shape: {
           borderRadius: 8, // More rounded corners for components
         },
-        // Custom shadows for light/dark mode
-        shadows: mode === 'light' ? [
-          'none', // 0
-          '0px 1px 3px rgba(0,0,0,0.12), 0px 1px 2px rgba(0,0,0,0.24)', // 1
-          '0px 2px 5px rgba(0,0,0,0.15), 0px 1px 2px rgba(0,0,0,0.20)', // 2 (used for Paper)
-          '0px 3px 8px rgba(0,0,0,0.18), 0px 2px 4px rgba(0,0,0,0.22)', // 3 (stronger)
-          // ... you can define more up to 24 if needed
-        ] : [
-          'none', // 0
-          '0px 1px 3px rgba(0,0,0,0.5), 0px 1px 2px rgba(0,0,0,0.3)', // 1
-          '0px 2px 5px rgba(0,0,0,0.6), 0px 1px 2px rgba(0,0,0,0.4)', // 2 (used for Paper)
-          '0px 3px 8px rgba(0,0,0,0.7), 0px 2px 4px rgba(0,0,0,0.5)', // 3 (stronger)
-          // ...
-        ],
+        // Custom shadows for light/dark mode - Defined up to 24
+        shadows: createTheme({ palette: { mode: 'light' } }).shadows.map((s, i) => {
+          if (mode === 'light') {
+            if (i === 1) return '0px 1px 3px rgba(0,0,0,0.12), 0px 1px 2px rgba(0,0,0,0.24)';
+            if (i === 2) return '0px 2px 5px rgba(0,0,0,0.15), 0px 1px 2px rgba(0,0,0,0.20)';
+            if (i === 3) return '0px 3px 8px rgba(0,0,0,0.18), 0px 2px 4px rgba(0,0,0,0.22)';
+            if (i === 4) return '0px 4px 10px rgba(0,0,0,0.2), 0px 3px 6px rgba(0,0,0,0.25)'; // Added for elevation 4
+            // Add more as needed, or let defaults handle it beyond index 3
+            return s; // Use default MUI shadow for other indices
+          } else { // Dark mode shadows
+            if (i === 1) return '0px 1px 3px rgba(0,0,0,0.5), 0px 1px 2px rgba(0,0,0,0.3)';
+            if (i === 2) return '0px 2px 5px rgba(0,0,0,0.6), 0px 1px 2px rgba(0,0,0,0.4)';
+            if (i === 3) return '0px 3px 8px rgba(0,0,0,0.7), 0px 2px 4px rgba(0,0,0,0.5)';
+            if (i === 4) return '0px 4px 10px rgba(0,0,0,0.8), 0px 3px 6px rgba(0,0,0,0.6)'; // Added for elevation 4
+            return s; // Use default MUI shadow for other indices
+          }
+        }),
         components: {
           MuiPaper: {
             defaultProps: {
@@ -284,7 +301,6 @@ function App() {
             styleOverrides: {
               root: {
                 borderRadius: 8, // Ensure Paper respects the global border radius
-                // boxShadow: theme.shadows[2], // This is applied by default with elevation
               },
             },
           },
@@ -324,7 +340,7 @@ function App() {
   );
 
   return (
-    // Wrapping the entire application with ThemeProvider and CssBaseline
+    // Wrap the entire application with ThemeProvider and CssBaseline
     <ThemeProvider theme={theme}>
       <CssBaseline /> {/* Applies base styles and sets background/text colors based on theme.mode */}
       <Box sx={{ flexGrow: 1 }}>
@@ -348,7 +364,7 @@ function App() {
           <Grid container spacing={3}>
 
             {/* Performance Overview (Metrics Section) - Uses dynamic data */}
-            <Grid item xs={12} md={8} lg={9}>
+            <Grid xs={12} md={8} lg={9}> {/* Removed 'item' prop */}
               <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column', height: 'auto', minHeight: 480 }}> {/* Increased padding to p={3} */}
                 <Typography variant="h5" gutterBottom>
                   Performance Overview
@@ -356,14 +372,14 @@ function App() {
 
                 {chartsLoading ? (
                   <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
-                    <Skeleton variant="rectangular" height={180} sx={{ mb: 2 }} />
-                    <Skeleton variant="rectangular" height={230} sx={{ mb: 2 }} />
+                    <Skeleton variant="rectangular" height={180} sx={{ mb: 2, borderRadius: 2 }} />
+                    <Skeleton variant="rectangular" height={230} sx={{ mb: 2, borderRadius: 2 }} />
                     <Skeleton variant="text" width="60%" sx={{ alignSelf: 'center' }} />
                   </Box>
                 ) : (
                   <Grid container spacing={2}>
                     {/* Engagement Lift Over Time (Line Chart) */}
-                    <Grid item xs={12} md={6}>
+                    <Grid xs={12} md={6}> {/* Removed 'item' prop */}
                       <Typography variant="h6" gutterBottom>Engagement Lift Over Time</Typography>
                       <Box sx={{ height: 200 }}>
                         <ResponsiveContainer width="100%" height="100%">
@@ -384,7 +400,7 @@ function App() {
                     </Grid>
 
                     {/* Conversion Rate Comparison (Bar Chart) */}
-                    <Grid item xs={12} md={6}>
+                    <Grid xs={12} md={6}> {/* Removed 'item' prop */}
                       <Typography variant="h6" gutterBottom>Conversion Rate Comparison</Typography>
                       <Box sx={{ height: 200 }}>
                         <ResponsiveContainer width="100%" height="100%">
@@ -403,7 +419,7 @@ function App() {
                     </Grid>
 
                     {/* Simulated A/B Test Results (Grouped Bar Chart) */}
-                    <Grid item xs={12}>
+                    <Grid xs={12}> {/* Removed 'item' prop */}
                       <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Simulated A/B Test Results: {abTestConfig.testName}</Typography>
                       <Box sx={{ height: 250 }}>
                         <ResponsiveContainer width="100%" height="100%">
@@ -424,7 +440,7 @@ function App() {
                     </Grid>
 
                     {/* Audience Segmentation (Pie Chart) */}
-                    <Grid item xs={12}>
+                    <Grid xs={12}> {/* Removed 'item' prop */}
                       <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Audience Segmentation</Typography>
                       <Box sx={{ height: 250 }}>
                         <ResponsiveContainer width="100%" height="100%">
@@ -441,7 +457,6 @@ function App() {
                               animationDuration={1000}
                             >
                               {dynamicAudienceSegmentation.map((entry, index) => (
-                                // Using colors from the theme palette or custom harmonious colors
                                 <Cell key={`cell-${index}`} fill={
                                   [theme.palette.primary.main, theme.palette.secondary.main, '#FFBB28', '#00C49F'][index % 4]
                                 } />
@@ -453,13 +468,13 @@ function App() {
                         </ResponsiveContainer>
                       </Box>
                     </Grid>
-                  </Grid>
+                  </Grid> 
                 )}
               </Paper>
             </Grid> {/* End Metrics Section */}
 
             {/* Summary Stats (from Phase 1, unchanged) */}
-            <Grid item xs={12} md={4} lg={3}>
+            <Grid xs={12} md={4} lg={3}> {/* Removed 'item' prop */}
               <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column', height: 240 }}> {/* Increased padding to p={3} */}
                 <Typography variant="h6" gutterBottom>
                   Summary Stats
@@ -471,20 +486,20 @@ function App() {
             </Grid>
 
             {/* Rule Configuration Section (using RuleEditor component from Phase 2) */}
-            <Grid item xs={12}>
+            <Grid xs={12}> {/* Removed 'item' prop */}
               <Paper sx={{ p: 3 }}> {/* Increased padding to p={3} */}
                 <RuleEditor onSaveRules={handleRulesSave} availableContentVariants={Object.keys(mockContentVariants)} />
               </Paper>
             </Grid>
 
             {/* A/B Test Configuration Section (from Phase 3 + Validation from Refinement 2) */}
-            <Grid item xs={12}>
+            <Grid xs={12}> {/* Removed 'item' prop */}
               <Paper sx={{ p: 3 }}> {/* Increased padding to p={3} */}
                 <Typography variant="h6" gutterBottom>
                   A/B Test Configuration (Simulated)
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid xs={12} sm={6} md={4}> {/* Removed 'item' prop */}
                     <TextField
                       label="Test Name"
                       fullWidth
@@ -500,7 +515,7 @@ function App() {
                       helperText={abTestConfigErrors.testName}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid xs={12} sm={6} md={4}> {/* Removed 'item' prop */}
                     <FormControl fullWidth margin="normal" error={!!abTestConfigErrors.controlVariant}>
                       <InputLabel>Control Variant</InputLabel>
                       <Select
@@ -518,10 +533,10 @@ function App() {
                           <MenuItem key={variantKey} value={variantKey}>{variantKey}</MenuItem>
                         ))}
                       </Select>
-                      {abTestConfigErrors.controlVariant && <Typography color="error" variant="caption">{abTestConfigErrors.controlVariant}</Typography>}
+                      {abTestConfigErrors.controlVariant && <Typography color="error" variant="caption">{abTestConfigErrors.controlMeaningful.controlVariant}</Typography>}
                     </FormControl>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid xs={12} sm={6} md={4}> {/* Removed 'item' prop */}
                     <FormControl fullWidth margin="normal" error={!!abTestConfigErrors.variantAVariant}>
                       <InputLabel>Variant A</InputLabel>
                       <Select
@@ -542,7 +557,7 @@ function App() {
                       {abTestConfigErrors.variantAVariant && <Typography color="error" variant="caption">{abTestConfigErrors.variantAVariant}</Typography>}
                     </FormControl>
                   </Grid>
-                   <Grid item xs={12} sm={6} md={4}>
+                   <Grid xs={12} sm={6} md={4}> {/* Removed 'item' prop */}
                     <FormControl fullWidth margin="normal">
                       <InputLabel>Variant B (Optional)</InputLabel>
                       <Select
@@ -557,7 +572,7 @@ function App() {
                       </Select>
                     </FormControl>
                   </Grid>
-                   <Grid item xs={12} sm={6} md={4}>
+                   <Grid xs={12} sm={6} md={4}> {/* Removed 'item' prop */}
                     <FormControl fullWidth margin="normal">
                       <InputLabel>Audience Segment</InputLabel>
                       <Select
@@ -571,7 +586,7 @@ function App() {
                       </Select>
                     </FormControl>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid xs={12} sm={6} md={4}> {/* Removed 'item' prop */}
                     <FormControl fullWidth margin="normal">
                       <InputLabel>Status</InputLabel>
                       <Select
@@ -610,7 +625,7 @@ function App() {
             </Grid>
 
             {/* Content Preview Section (from Phase 2) */}
-            <Grid item xs={12}>
+            <Grid xs={12}> {/* Removed 'item' prop */}
               <Paper sx={{ p: 3 }}> {/* Increased padding to p={3} */}
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                   <Typography variant="h6" gutterBottom>
