@@ -1,44 +1,38 @@
-// src/App.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   AppBar, Toolbar, Typography, Container, Box, Grid, Paper, FormControl,
   InputLabel, Select, MenuItem, TextField,
-  // Material-UI Theming imports
   createTheme, ThemeProvider, CssBaseline, IconButton, Button,
-  // New imports for UI improvements
-  Snackbar, Alert, Skeleton // Added for enhanced feedback and loading states
+  Snackbar, Alert, Skeleton 
 } from '@mui/material';
 
-// Material-UI Icon imports for theme toggle
-import Brightness4Icon from '@mui/icons-material/Brightness4'; // Moon icon for Dark Mode
-import Brightness7Icon from '@mui/icons-material/Brightness7'; // Sun icon for Light Mode
+import Brightness4Icon from '@mui/icons-material/Brightness4'; 
+import Brightness7Icon from '@mui/icons-material/Brightness7'; 
 
-// Recharts imports for all chart types used
+
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
 
-// Import your custom components and local mock data
+
 import RuleEditor from './components/RuleEditor';
-import { mockUserProfiles } from './data/mockUsers'; // Still using local user profiles
-import { mockContentVariants } from './data/mockContentVariants'; // Still using local content variants
+import { mockUserProfiles } from './data/mockUsers'; 
+import { mockContentVariants } from './data/mockContentVariants'; 
 import { evaluateRules } from './utils/personalizationEngine';
 
 
 function App() {
-  // --- State Declarations ---
-
-  // Theme mode state, initialized from Local Storage
+  
   const [mode, setMode] = useState(() => {
     if (typeof window !== 'undefined') {
       const storedMode = localStorage.getItem('themeMode');
-      return storedMode || 'light'; // Default to 'light' if not found
+      return storedMode || 'light'; 
     }
-    return 'light'; // Default for SSR or initial render without window
+    return 'light'; 
   });
 
-  // Personalization Rules state, initialized from Local Storage
+  
   const [rules, setRules] = useState(() => {
     try {
       const storedRules = localStorage.getItem('personalizationRules');
@@ -49,52 +43,47 @@ function App() {
     }
   });
 
-  // State for current simulated user (selected from mockUserProfiles)
+  
   const [selectedUser, setSelectedUser] = useState(mockUserProfiles[0]);
 
-  // State for the key of the content variant determined by personalization engine
+  
   const [personalizedContentKey, setPersonalizedContentKey] = useState('default');
 
-  // State for A/B Test Configuration (Simulated)
+  
   const [abTestConfig, setAbTestConfig] = useState({
     testName: 'Homepage Personalization Test',
-    controlVariant: '', // Default to empty for validation
-    variantAVariant: '', // Default to empty for validation
+    controlVariant: '', 
+    variantAVariant: '', 
     variantBVariant: '',
     audienceSegment: 'all',
     status: 'running',
   });
 
-  // State for A/B Test Configuration Validation Errors
+ 
   const [abTestConfigErrors, setAbTestConfigErrors] = useState({});
 
-  // States for Dynamically Generated Chart Data
+ 
   const [dynamicEngagementData, setDynamicEngagementData] = useState([]);
   const [dynamicABTestData, setDynamicABTestData] = useState([]);
   const [dynamicAudienceSegmentation, setDynamicAudienceSegmentation] = useState([]);
   const [dynamicConversionRateData, setDynamicConversionRateData] = useState([]);
 
-  // State for loading indicators for charts
+  
   const [chartsLoading, setChartsLoading] = useState(true);
 
-  // State for Snackbar feedback
+  
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // 'success' | 'error' | 'info' | 'warning'
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success'); 
 
-  // --- End State Declarations ---
-
-
-  // --- Helper Functions ---
-
-  // Function to show Snackbar messages
+  
   const showSnackbar = (message, severity) => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setOpenSnackbar(true);
   };
 
-  // Close Snackbar
+  
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') {
       return;
@@ -120,14 +109,14 @@ function App() {
     return errors;
   };
 
-    // Effect to save theme mode to Local Storage whenever 'mode' state changes
+    // Effect to save theme mode to Local Storage whenever 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('themeMode', mode);
     }
   }, [mode]);
 
-  // Effect to save personalization rules to Local Storage whenever 'rules' state changes
+  // Effect to save personalization rules to Local Storage 
   useEffect(() => {
     try {
       localStorage.setItem('personalizationRules', JSON.stringify(rules));
@@ -137,7 +126,7 @@ function App() {
     }
   }, [rules]);
 
-  // Effect to re-evaluate personalization when selectedUser or rules change
+  // Effect to re-evaluate personalization 
   useEffect(() => {
     const contentKey = evaluateRules(selectedUser, rules);
     setPersonalizedContentKey(contentKey);
@@ -145,10 +134,10 @@ function App() {
 
   // Effect to generate dynamic data for all charts on component mount
   useEffect(() => {
-    setChartsLoading(true); // Set loading to true when starting data generation
+    setChartsLoading(true); 
     // Simulate a network delay for data loading
     const timer = setTimeout(() => {
-      // --- Helper Functions to Generate Mock Data ---
+      
       const generateEngagementData = () => {
         const data = [];
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -213,8 +202,8 @@ function App() {
       setDynamicAudienceSegmentation(generateAudienceSegmentation());
       setDynamicConversionRateData(generateConversionRateComparison());
 
-      setChartsLoading(false); // Set loading to false after data is generated
-    }, 1500); // Simulate 1.5 seconds loading time
+      setChartsLoading(false); 
+    }, 1500); 
 
     return () => clearTimeout(timer); // Cleanup timer on unmount
 
