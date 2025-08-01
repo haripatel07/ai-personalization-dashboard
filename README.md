@@ -1,7 +1,7 @@
 # AI-Powered Content Personalization Dashboard (Frontend Only)
 
-![Dashboard Screenshot 1](public\1.png)
-![Dashboard Screenshot 2](public\2.png)
+![Dashboard Screenshot 1](https://github.com/haripatel07/ai-personalization-dashboard/blob/main/public/1.png)
+![Dashboard Screenshot 2](https://github.com/haripatel07/ai-personalization-dashboard/blob/main/public/2.png)
 
 ## Table of Contents
 
