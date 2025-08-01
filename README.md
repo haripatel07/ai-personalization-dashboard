@@ -124,7 +124,7 @@ This dashboard is a work in progress, and the UI will be continuously improved. 
 * **More Advanced UI/UX:** Exploring more complex animations, custom transitions, and unique component designs beyond Material-UI defaults.
 * **Dashboard Layout Customization:** Implementing drag-and-drop functionality for chart widgets.
 * **Filtering & Sorting:** Adding options to filter and sort rules or simulated data.
-* **Accessibility (A11y):** A deeper dive into ensuring the application is fully accessible for users with disabilities.
+* **Accessibility:** A deeper dive into ensuring the application is fully accessible for users with disabilities.
 * **Performance Optimizations:** Further optimizing rendering performance for very large datasets (though not a primary concern with current simulated data).
 * **Export Options:** Allowing users to export chart data or reports.
 
